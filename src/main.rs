@@ -4,7 +4,7 @@ use crossterm::{
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
 };
-use inviders::{frame, render};
+use inviders::{frame::{self, Drawable}, render, player::Player};
 
 use std::{error::Error, io, sync::mpsc, time::Duration, thread};
 
@@ -48,7 +48,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Game loop
     'gameloop: loop {
         // Per frame init
-        let curr_frame = frame::new_frame();
+        let mut curr_frame = frame::new_frame();
 
         // Input
         while event::poll(Duration::default())? {
@@ -67,6 +67,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         // Draw & Render
+        player.draw(&mut curr_frame);
         let _ = render_tx.send(curr_frame);
         thread::sleep(Duration::from_millis(16));
     }
