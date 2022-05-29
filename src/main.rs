@@ -4,21 +4,25 @@ use crossterm::{
     terminal::{self, EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
 };
-use inviders::{frame::{self, Drawable}, render, player::Player};
+use inviders::{
+    frame::{self, Drawable},
+    player::Player,
+    render,
+};
 
 use std::{error::Error, io, sync::mpsc, time::Duration, thread};
 
 use rusty_audio::Audio;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    // let mut audio = Audio::new();
-    // audio.add("explode", "explode.wav");
-    // audio.add("lose", "lose.wav");
-    // audio.add("move", "move.wav");
-    // audio.add("pew", "pew.wav");
-    // audio.add("startup", "startup.wav");
-    // audio.add("win", "win.wav");
-    // audio.play("startup");
+    let mut audio = Audio::new();
+    audio.add("explode", "explode.wav");
+    audio.add("lose", "lose.wav");
+    audio.add("move", "move.wav");
+    audio.add("pew", "pew.wav");
+    audio.add("startup", "startup.wav");
+    audio.add("win", "win.wav");
+    audio.play("startup");
 
     // Terminal
     let mut stdout = io::stdout();
@@ -58,9 +62,10 @@ fn main() -> Result<(), Box<dyn Error>> {
                         // audio.play("lose")
                         println!("lose");
                         break 'gameloop;
-                    }
+                    },
                     KeyCode::Left => player.move_left(),
                     KeyCode::Right => player.move_right(),
+                    KeyCode::Enter => player.shoot(),
                     _ => {}
                 }
             }
@@ -72,12 +77,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         thread::sleep(Duration::from_millis(16));
     }
 
-
     // Cleanup
     drop(render_tx);
     render_handle.join().unwrap();
-    
-    // audio.wait();
+
+    audio.wait();
     stdout.execute(Show)?;
     stdout.execute(LeaveAlternateScreen)?;
     terminal::disable_raw_mode()?;
